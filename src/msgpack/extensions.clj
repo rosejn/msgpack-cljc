@@ -1,7 +1,10 @@
 (ns msgpack.extensions
   "Extended types for JVM Clojure-specific types"
-  (:require [msgpack.core :as msg]
-            [msgpack.macros :refer [extend-msgpack]]))
+  (:require
+    [msgpack.core :as msg]
+    [msgpack.macros :refer [extend-msgpack]])
+  (:import
+    [java.nio ByteBuffer ByteOrder]))
 
 (defn- keyword->str
   "Convert keyword to string with namespace preserved.
