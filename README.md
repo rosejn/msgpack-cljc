@@ -1,16 +1,128 @@
-# clojure-msgpack
+# msgpack-cljc
 
-clojure-msgpack is a lightweight and simple library for converting
-between native Clojure data structures and MessagePack byte formats.
-clojure-msgpack only depends on Clojure itself; it has no third-party
+msgpack-cljc is a lightweight and simple library for converting
+between native Clojure(script) data structures and MessagePack byte formats.
+clojure-msgpack only depends on Clojure(script) itself; it has no third-party
 dependencies.
 
+
+### History
+
+This library is the result of integrating and extending two previous msgpack libraries:
+
+* [clojure-msgpack](https://github.com/edma2/clojure-msgpack)
+* [msgpack-cljs](https://github.com/pkcsecurity/msgpack-cljs)
+
+
+Their differing interfaces and approaches for extending msgpack with
+additional types have been unified into a single cljc library, and support
+for transmitting typed arrays has been added. The library is also tested
+to be compatible with itself sending data in both directions between
+Clojure and ClojureScript, and it has been used in production for
+several years. After trying to coordinate with the original authors (no replies)
+I decided to fork the projects and continue development here.
+
+* https://github.com/edma2/clojure-msgpack/issues/29
+* https://github.com/pkcsecurity/msgpack-cljs/issues/4
+
+Thanks for the original work!
+
+
 ## Installation
+
 
 [![Clojars Project](http://clojars.org/clojure-msgpack/latest-version.svg)](https://clojars.org/clojure-msgpack)
 [![Build Status](https://travis-ci.org/edma2/clojure-msgpack.svg?branch=master)](https://travis-ci.org/edma2/clojure-msgpack)
 
 ## Usage
+
+
+### Sente
+
+This library works great with [Sente](https://github.com/ptaoussanis/sente) for sending data between Clojure and ClojureScript over ajax/websockets.
+
+Use the `IPacker` protocol to connect msgpack to sente:
+
+```clojure
+
+(ns example.server
+  (:require
+    [msgpack.core :as msgpack]
+    [msgpack.extensions]
+    [msgpack.macros :refer [extend-msgpack]]
+    [taoensso.sente :as sente]
+    [taoensso.sente.server-adapters.http-kit :refer (get-sch-adapter)]
+    [taoensso.sente.interfaces :refer [IPacker]])
+  (:import
+    [java.time Instant]))
+
+; Example of adding packing support for java.time.Instant
+(extend-msgpack
+  java.time.Instant
+  100
+
+  (pack
+    [instant]
+    (msgpack/pack (.toString instant)))
+
+  (unpack
+    [bytes]
+    (java.time.Instant/parse (String. bytes))))
+
+; Setup the sente packer
+(deftype MsgPacker
+  []
+  IPacker
+  (pack   [_ x]
+    (msgpack/pack x))
+
+  (unpack [_ s]
+    (let [msg (msgpack/unpack s)]
+      msg)))
+
+(defn msgpack-packer
+  []
+  (MsgPacker.))
+
+
+(let [ws-http-kit-adapter (get-sch-adapter)
+      opts {:csrf-token-fn (fn [_] "special-csrf-token")
+            :packer (msgpack-packer)
+            :user-id-fn (fn [_] (util/uuid))}
+      ws-server (sente/make-channel-socket-server! ws-http-kit-adapter opts)]
+     ...)
+```
+
+
+And on the client side you do basically the same thing:
+
+
+```clojure
+(ns example.client
+   [taoensso.sente :as sente]
+   [taoensso.sente.interfaces :refer [IPacker]])
+
+(deftype MsgPacker []
+  IPacker
+  (pack   [_ x] (msgpack/pack x))
+  (unpack [_ s] (msgpack/unpack s)))
+
+
+(defn msg-packer
+  []
+  (MsgPacker.))
+
+
+(let [{:keys [chsk ch-recv send-fn state]}
+      (sente/make-channel-socket-client!
+        "/my-ws-endpoint" "special-csrf-token"
+        {:type :ws
+         :port 4444
+         :packer (msg-packer)
+         :ws-opts {:binary-type "arraybuffer"}})
+
+```
+
 
 ### Basic
 * ```pack```: Serialize object as a sequence of java.lang.Bytes.

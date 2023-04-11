@@ -1,12 +1,12 @@
-(defproject clojure-msgpack "1.2.1"
-  :description "A lightweight Clojure implementation of the MessagePack spec."
-  :url "https://github.com/edma2/clojure-msgpack"
+(defproject msgpack-cljc "2.0.0"
+  :description "A Clojure(script) implementation of the MessagePack spec with full compatibility from server to browser."
+  :url "https://github.com/rosejn/msgpack-cljc"
   :license {:name "The MIT License (MIT)"
             :url "http://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.8.0"]]
   :global-vars {*warn-on-reflection* true}
   :scm {:name "git"
-        :url "https://github.com/edma2/clojure-msgpack"}
+        :url "https://github.com/rosejn/msgpack-cljc"}
   :profiles
   {:non-utf8-encoding
    {:jvm-opts
