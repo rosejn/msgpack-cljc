@@ -2,7 +2,7 @@
 
 msgpack-cljc is a lightweight and simple library for converting
 between native Clojure(script) data structures and MessagePack byte formats.
-clojure-msgpack only depends on Clojure(script) itself; it has no third-party
+msgpack-cljc only depends on Clojure(script) itself; it has no third-party
 dependencies.
 
 
@@ -31,8 +31,8 @@ Thanks for the original work!
 ## Installation
 
 
-[![Clojars Project](http://clojars.org/clojure-msgpack/latest-version.svg)](https://clojars.org/clojure-msgpack)
-[![Build Status](https://travis-ci.org/edma2/clojure-msgpack.svg?branch=master)](https://travis-ci.org/edma2/clojure-msgpack)
+[![Clojars Project](http://clojars.org/msgpack-cljc/latest-version.svg)](https://clojars.org/msgpack-cljc)
+[![Build Status](https://travis-ci.org/edma2/msgpack-cljc.svg?branch=master)](https://travis-ci.org/edma2/msgpack-cljc)
 
 ## Usage
 
@@ -125,8 +125,9 @@ And on the client side you do basically the same thing:
 
 
 ### Basic
-* ```pack```: Serialize object as a sequence of java.lang.Bytes.
-* ```unpack``` Deserialize bytes as a Clojure object.
+* `pack`: Serialize object as a sequence of java.lang.Bytes.
+* `unpack` Deserialize bytes as a Clojure object.
+
 ```clojure
 (require '[msgpack.core :as msg])
 (require 'msgpack.clojure-extensions)
@@ -136,10 +137,10 @@ And on the client side you do basically the same thing:
 
 (msg/unpack (msg/pack {:compact true :schema 0}))
 ; => {:schema 0, :compact true}
-`````
+```
 
 ### Streaming
-`clojure-msgpack` provides a streaming API for situations where it is more
+`msgpack-cljc` provides a streaming API for situations where it is more
 convenient or efficient to work with byte streams instead of fixed byte arrays
 (e.g. size of object is not known ahead of time).
 
@@ -248,4 +249,6 @@ All pack and unpack functions take an optional map of options:
 ```
 
 ## License
-clojure-msgpack is MIT licensed. See the included LICENSE file for more details.
+msgpack-cljc is MIT licensed. See the included LICENSE file for more details.
+
+
