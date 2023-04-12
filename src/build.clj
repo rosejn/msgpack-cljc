@@ -36,6 +36,6 @@
 
 (defn deploy [_]
   (dd/deploy {:installer :remote
-              :sign-releases? true
+              :sign-releases? false
               :artifact jar-file
               :pom-file "pom.xml"}))
