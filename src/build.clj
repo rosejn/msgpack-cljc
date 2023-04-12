@@ -3,7 +3,7 @@
             [deps-deploy.deps-deploy :as dd]))
 
 
-(def lib 'io.github.rosejn/msgpack-cljc)
+(def lib 'com.github.rosejn/msgpack-cljc)
 (def version (format "2.0.%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
@@ -19,6 +19,7 @@
                 :lib lib
                 :version version
                 :basis basis
+                :scm {:url "https://github.com/rosejn/msgpack-cljc"}
                 :src-dirs ["src"]})
   (b/copy-dir {:src-dirs ["src" "resources"]
                :target-dir class-dir})
@@ -38,4 +39,5 @@
   (dd/deploy {:installer :remote
               :sign-releases? false
               :artifact jar-file
-              :pom-file "pom.xml"}))
+              :pom-file (b/pom-path {:lib lib
+                                     :class-dir class-dir})}))

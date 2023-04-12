@@ -31,8 +31,7 @@ Thanks for the original work!
 ## Installation
 
 
-[![Clojars Project](http://clojars.org/msgpack-cljc/latest-version.svg)](https://clojars.org/msgpack-cljc)
-[![Build Status](https://travis-ci.org/edma2/msgpack-cljc.svg?branch=master)](https://travis-ci.org/edma2/msgpack-cljc)
+[![Clojars Project](https://img.shields.io/clojars/v/com.github.rosejn/msgpack-cljc.svg)](https://clojars.org/com.github.rosejn/msgpack-cljc)
 
 ## Usage
 

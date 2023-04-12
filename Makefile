@@ -4,13 +4,10 @@ clean:
 install:
 	clj -T:build install
 
-pom.xml:
-	clj -Spom
-
 jar:
 	clj -T:build jar
 
-deploy: pom.xml jar
+deploy: jar
 	clj -T:build deploy
 
 repl:
