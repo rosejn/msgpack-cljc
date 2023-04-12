@@ -6,6 +6,7 @@
   (:import
     [java.nio ByteBuffer ByteOrder]))
 
+
 (defn- keyword->str
   "Convert keyword to string with namespace preserved.
   Example: :A/A => \"A/A\""
@@ -135,33 +136,3 @@
       (.get double-buf double-ary)
       double-ary)))
 
-
-(extend-msgpack
-  (class (byte-array 0)) 104
-
-  (pack
-    [ary]
-    (do
-      ary))
-
-  (unpack
-    [bytes]
-    (do
-      bytes)))
-
-
-;(clojure.core/let [type__211__auto__ 3]
-;  (clojure.core/assert (clojure.core/<= 0 type__211__auto__ 127) "[-1, -128]: reserved for future pre-defined extensions.")
-;  (do
-;    (clojure.core/extend-protocol msgpack.interface/Packable
-;      clojure.lang.Keyword
-;      (msgpack.interface/pack-bytes
-;        [k s__212__auto__]
-;        (msgpack.interface/pack-bytes
-;          (msgpack.interface/->Extended type__211__auto__ (m/pack (keyword->str k)))
-;          s__212__auto__)))
-;
-;    (clojure.core/defmethod msgpack.interface/unpack-extended type__211__auto__
-;      [ext__213__auto__]
-;      (clojure.core/let [bytes (:data ext__213__auto__)]
-;        (keyword (msg/unpack bytes))))))

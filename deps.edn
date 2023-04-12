@@ -28,7 +28,8 @@
   :test
   {:extra-paths ["test"]
    :extra-deps {org.clojure/spec.alpha {:mvn/version "0.3.218"}
-                lambdaisland/kaocha {:mvn/version "1.82.1306"}}
+                lambdaisland/kaocha {:mvn/version "1.82.1306"}
+                io.github.clojure/tools.build {:mvn/version "0.9.4"}}
    :main-opts ["-m" "kaocha.runner"]}
 
 

@@ -2,11 +2,12 @@
   "Macros for extending MessagePack with Extended types.
   See msgpack.extensions for examples."
   (:require
-    [msgpack.interface :refer [Packable pack-bytes ->Extended unpack-extended]]
-    [msgpack.core :refer :all]))
+    [msgpack.interface :refer [Packable pack-bytes ->Extended unpack-extended]]))
 
 
 (defmacro extend-msgpack
+  {:clj-kondo/ignore [:unresolved-symbol]}
+
   [class type-num pack-form unpack-form]
   (let [[pack-fn pack-args pack] pack-form
         [unpack-fn unpack-args unpack] unpack-form]

@@ -2,6 +2,7 @@
   (:require [clojure.tools.build.api :as b]
             [deps-deploy.deps-deploy :as dd]))
 
+
 (def lib 'io.github.rosejn/msgpack-cljc)
 (def version (format "2.0.%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")

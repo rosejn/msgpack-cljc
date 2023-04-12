@@ -37,11 +37,28 @@
 (defn- ext [type bytes]
   (->Extended type (unsigned-byte-array bytes)))
 
+(defn- bytes-to-hex [bytes]
+  (apply str (map #(format "0x%02X " %) (unsigned-bytes bytes))))
+
+(defn- byte-to-binary [byte]
+  (let [s (Integer/toBinaryString byte)]
+    (fill-string (- 8 (count s)) "0") s))
+
+(Integer/toString 0xf2 2)
+
 (defmacro round-trip [obj expected-bytes]
   `(let [obj# ~obj
          expected-bytes# (unsigned-bytes ~expected-bytes)]
      (is (= expected-bytes# (seq (msg/pack obj#))))
      (is (= (normalize obj#) (normalize (msg/unpack expected-bytes#))))))
+
+
+(defn debug-round-trip [obj expected-bytes]
+  (let [expected-bytes (unsigned-bytes expected-bytes)]
+     (println "expected bytes:" (bytes-to-hex expected-bytes))
+     (println "actual bytes:" (bytes-to-hex (seq (msg/pack obj))))
+     (println "expected:" obj)
+     (println "actual:" (msg/unpack expected-bytes))))
 
 (deftest nil-test
   (testing "nil"
@@ -215,3 +232,4 @@
   (testing "map 16"
     (round-trip (zipmap (range 0 16) (repeat 16 5))
                 [0xde 0x0 0x10 0x0 0x5 0x7 0x5 0x1 0x5 0x4 0x5 0xf 0x5 0xd 0x5 0x6 0x5 0x3 0x5 0xc 0x5 0x2 0x5 0xb 0x5 0x9 0x5 0x5 0x5 0xe 0x5 0xa 0x5 0x8 0x5])))
+

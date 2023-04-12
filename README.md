@@ -16,7 +16,7 @@ This library is the result of integrating and extending two previous msgpack lib
 
 Their differing interfaces and approaches for extending msgpack with
 additional types have been unified into a single cljc library, and support
-for transmitting typed arrays has been added. The library is also tested
+for transmitting typed (Java -> JS) arrays has been added. The library is also tested
 to be compatible with itself sending data in both directions between
 Clojure and ClojureScript, and it has been used in production for
 several years. After trying to coordinate with the original authors (no replies)
@@ -36,6 +36,40 @@ Thanks for the original work!
 
 ## Usage
 
+### Clojure data structures to bytes and back
+
+* `pack`: Serialize object as a sequence of java.lang.Bytes.
+* `unpack` Deserialize bytes as a Clojure object.
+
+If you stick to a JSON like data structure then your msgpack data will be readable by other languages.  This has been used in production to talk with python services for a few years.  Otherwise if you are in an a pure clj/cljs system then you can use keywords, symbols, ratios, and sets as well.
+
+
+```clojure
+(require '[msgpack.core :as msg])
+
+(msg/pack {"foo" "bar" "baz" 234.23})
+; => #object["[B" 0x33db72bd "[B@33db72bd"]
+
+(msg/unpack (msg/pack {"foo" "bar" "baz" 234.23}))
+; => {"foo" "bar", "baz" 234.23}
+
+user=> (msg/unpack (msg/pack {"user-login" "jon.doe@email.com"
+                              "phone" "222-333-4444"
+                              "age" 42
+                              "foo" [1 2 3 4]}))
+; => {"user-login" "jon.doe@email.com", "phone" "222-333-4444", "age" 42, "foo" [1 2 3 4]}
+
+
+; Load clojure extensions for keyword etc. support
+(require 'msgpack.extensions)
+
+user=> (msg/unpack (msg/pack {:user/login "jon.doe@email.com" :user/phone "222-333-4444" :user/age 42 :user/foo
+[1 2 3 4]}))
+; => #:user{:login "jon.doe@email.com", :phone "222-333-4444", :age 42, :foo [1 2 3 4]}
+
+```
+
+### Clojure data structures to bytes and back
 
 ### Sente
 
@@ -124,21 +158,6 @@ And on the client side you do basically the same thing:
 ```
 
 
-### Basic
-* `pack`: Serialize object as a sequence of java.lang.Bytes.
-* `unpack` Deserialize bytes as a Clojure object.
-
-```clojure
-(require '[msgpack.core :as msg])
-(require 'msgpack.clojure-extensions)
-
-(msg/pack {:compact true :schema 0})
-; => #<byte[] [B@60280b2e>
-
-(msg/unpack (msg/pack {:compact true :schema 0}))
-; => {:schema 0, :compact true}
-```
-
 ### Streaming
 `msgpack-cljc` provides a streaming API for situations where it is more
 convenient or efficient to work with byte streams instead of fixed byte arrays
@@ -191,7 +210,7 @@ Serializing a value of unrecognized type will fail with `IllegalArgumentExceptio
 ### Clojure types
 Some native Clojure types don't have an obvious MessagePack counterpart. We can
 serialize them as Extended types. To enable automatic conversion of these
-types, load the `clojure-extensions` library.
+types, load the `msgpack.extensions` library.
 
 Clojure			    | MessagePack
 ----------------------------|------------
@@ -201,14 +220,14 @@ java.lang.Character	    | Extended (type = 5)
 clojure.lang.Ratio	    | Extended (type = 6)
 clojure.lang.IPersistentSet | Extended (type = 7)
 
-With `msgpack.clojure-extensions`:
+With `msgpack.extensions`:
 ```clojure
-(require 'msgpack.clojure-extensions)
+(require 'msgpack.extensions)
 (msg/pack :hello)
 ; => #<byte[] [B@a8c55bf>
 ```
 
-Without `msgpack.clojure-extensions`:
+Without `msgpack.extensions`:
 ```clojure
 (msg/pack :hello)
 ; => IllegalArgumentException No implementation of method: :pack-stream of

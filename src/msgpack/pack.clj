@@ -14,7 +14,9 @@
 
 (def ^:private ^Charset MSGPACK-CHARSET (Charset/forName "UTF-8"))
 
-(defmacro cond-let [bindings & clauses]
+(defmacro cond-let
+  {:clj-kondo/lint-as 'clojure.core/let}
+  [bindings & clauses]
   `(let ~bindings (cond ~@clauses)))
 
 
@@ -93,6 +95,28 @@
     (pack-bytes item s)))
 
 
+(def ^:private CLASS-OF-BYTE-ARRAY
+  (class (java.lang.reflect.Array/newInstance Byte 0)))
+
+(def ^:private CLASS-OF-PRIMITIVE-BYTE-ARRAY
+  (Class/forName "[B"))
+
+
+; Array of java.lang.Byte (boxed)
+(extend CLASS-OF-BYTE-ARRAY
+  Packable
+  {:pack-bytes
+   (fn [a ^DataOutput s]
+     (pack-bytes (byte-array a) s))})
+
+
+(extend CLASS-OF-PRIMITIVE-BYTE-ARRAY
+  Packable
+  {:pack-bytes
+   (fn [bytes ^DataOutput s]
+     (pack-byte-array bytes s))})
+
+
 (extend-protocol Packable
   nil
   (pack-bytes
@@ -148,18 +172,17 @@
     (let [type (:type e)
           ^bytes data (:data e)
           len (count data)]
-      (do
-        (cond
-          (= len 1) (.writeByte s 0xd4)
-          (= len 2) (.writeByte s 0xd5)
-          (= len 4) (.writeByte s 0xd6)
-          (= len 8) (.writeByte s 0xd7)
-          (= len 16) (.writeByte s 0xd8)
-          (<= len 0xff) (do (.writeByte s 0xc7) (.writeByte s len))
-          (<= len 0xffff) (do (.writeByte s 0xc8) (.writeShort s len))
-          (<= len 0xffffffff) (do (.writeByte s 0xc9) (.writeInt s len)))
-        (.writeByte s type)
-        (.write s data))))
+      (cond
+        (= len 1) (.writeByte s 0xd4)
+        (= len 2) (.writeByte s 0xd5)
+        (= len 4) (.writeByte s 0xd6)
+        (= len 8) (.writeByte s 0xd7)
+        (= len 16) (.writeByte s 0xd8)
+        (<= len 0xff) (do (.writeByte s 0xc7) (.writeByte s len))
+        (<= len 0xffff) (do (.writeByte s 0xc8) (.writeShort s len))
+        (<= len 0xffffffff) (do (.writeByte s 0xc9) (.writeInt s len)))
+      (.writeByte s type)
+      (.write s data)))
 
   clojure.lang.Sequential
   (pack-bytes [seq ^DataOutput s]
@@ -188,28 +211,6 @@
 
 ; Note: the extensions below are not in extend-protocol above because of
 ; a Clojure bug. See http://dev.clojure.org/jira/browse/CLJ-1381
-
-(def ^:private CLASS-OF-BYTE-ARRAY
-  (class (java.lang.reflect.Array/newInstance Byte 0)))
-
-(def ^:private CLASS-OF-PRIMITIVE-BYTE-ARRAY
-  (Class/forName "[B"))
-
-
-; Array of java.lang.Byte (boxed)
-(extend CLASS-OF-BYTE-ARRAY
-  Packable
-  {:pack-bytes
-   (fn [a ^DataOutput s]
-     (pack-bytes (byte-array a) s))})
-
-
-(extend CLASS-OF-PRIMITIVE-BYTE-ARRAY
-  Packable
-  {:pack-bytes
-   (fn [bytes ^DataOutput s]
-     (pack-byte-array bytes s))})
-
 
 (defn- read-uint8
   [^DataInput data-input]
@@ -357,6 +358,22 @@
 
             (= byte 0xdf)
             (unpack-map (read-uint32 data-input) data-input)))
+
+
+; Array of java.lang.Byte (boxed)
+(extend CLASS-OF-BYTE-ARRAY
+  Packable
+  {:pack-bytes
+   (fn [a ^DataOutput s]
+     (pack-bytes (byte-array a) s))})
+
+
+(extend CLASS-OF-PRIMITIVE-BYTE-ARRAY
+  Packable
+  {:pack-bytes
+   (fn [bytes ^DataOutput s]
+     (pack-byte-array bytes s))})
+
 
 
 (defn pack-stream
